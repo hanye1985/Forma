@@ -3,41 +3,30 @@ name: auto-docs-to-forma
 description: |
   自动从对话上下文整理帮助手册内容，并通过Forma平台生成在线手册。
   触发关键词包括"生成手册"、"创建在线手册"、"整理文档并发布"、"生成帮助中心"、"发布用户手册"、"制作产品文档"等。
-  支持两种模式：1) 从对话历史提取内容生成手册；2) 从已有文档直接生成手册。
+  工作流程：从对话历史提取准确内容 → 整理成结构化文档 → 上传到Forma → 生成并发布在线手册。
 ---
 
 # 智能文档手册生成器
 
-一个整合了对话内容提取和Forma在线手册发布的综合技能。能够自动分析用户与Agent的对话历史，整理出全面的帮助文档内容，并通过Forma平台一键生成精美的在线手册。
-
-## 功能概述
-
-本技能提供两种工作模式：
-
-### 模式一：从对话提取内容（Content First）
-适用于用户与Agent协作完成某个项目后，需要将整个过程整理成文档的场景。
-
-**流程**：分析对话 → 提取内容 → 生成文档 → 上传Forma → 发布手册
-
-### 模式二：从文档生成手册（Doc First）
-适用于用户已有现成文档（如Word、PDF、PPT等），希望直接生成在线手册的场景。
-
-**流程**：登录Forma → 创建项目 → 上传文档 → 一键生成 → 发布手册
+自动分析用户与Agent的对话历史，提取准确内容，整理成结构化文档，并通过Forma平台一键生成精美的在线手册。
 
 ## 触发条件
 
 在以下情况下使用此技能：
 - 用户说"生成手册"、"创建在线手册"、"发布文档"
 - 用户希望"把对话整理成帮助文档并发布"
-- 用户已有文档，希望"转成在线手册"
 - 用户需要"产品文档中心"、"用户帮助中心"
 - 用户表示"项目完成，需要交付文档"
 
-## 模式一：从对话提取内容
+## 工作流程
 
-### 步骤 1：分析对话历史
+**对话 → 提取 → 文档 → Forma → 手册**
 
-按时间顺序回顾整个对话，识别并提取：
+### Phase 1: 从对话提取准确内容
+
+#### 步骤 1：分析对话历史
+
+按时间顺序回顾整个对话，**严格依据对话上下文**提取以下信息：
 
 **用户意图与需求**
 - 初始请求：用户最初要求构建什么？
@@ -60,11 +49,13 @@ description: |
 - 用户工作流：分步交互说明
 - 边界情况：特殊场景处理
 
-### 步骤 2：构建文档结构
+> ⚠️ **重要原则**：提取内容必须完全基于对话上下文，**禁止凭空发挥、擅自捏造**。如果某些信息在对话中未提及，标记为`[对话中未涉及]`，不得编造。
+
+#### 步骤 2：构建文档结构
 
 根据创造物类型选择模板：
 
-#### 模板 A：软件/工具文档
+**模板 A：软件/工具文档**
 ```markdown
 # {项目名称}
 
@@ -74,8 +65,8 @@ description: |
 {是什么、解决什么问题、适合谁}
 
 ## 功能特性
-- ✅ {核心功能}
-- 🚀 {特色亮点}
+- 核心功能
+- 特色亮点
 
 ## 快速开始
 ### 安装
@@ -87,7 +78,7 @@ description: |
 ## 常见问题
 ```
 
-#### 模板 B：用户操作手册
+**模板 B：用户操作手册**
 ```markdown
 # {产品} 用户手册
 
@@ -117,7 +108,7 @@ description: |
 ## 常见问题
 ```
 
-#### 模板 C：API/技术文档
+**模板 C：API/技术文档**
 ```markdown
 # {API名称} 文档
 
@@ -133,22 +124,18 @@ description: |
 ## 变更日志
 ```
 
-### 步骤 3：内容质量检查
+#### 步骤 3：内容准确性自检
 
-生成文档后，进行以下检查：
+生成文档前，必须确认以下检查项：
 
-- [ ] **准确性**：技术细节与对话一致
-- [ ] **完整性**：所有功能都有描述
-- [ ] **可读性**：结构清晰，语言简洁
-- [ ] **实用性**：新用户5分钟内可上手
+- [ ] **准确性**：所有技术细节都与对话记录一致
+- [ ] **零捏造**：没有添加对话中不存在的信息
+- [ ] **完整性**：对话中提及的所有功能都有描述
+- [ ] **可追溯性**：每个事实都能在对话中找到出处
 
-## 模式二：从文档生成手册（Forma向导）
+### Phase 2: Forma发布流程
 
-当用户已有文档时，执行以下6步流程：
-
----
-
-### Step 1 — 登录：发送验证码
+#### Step 1 — 登录：发送验证码
 
 主动询问：
 > 请输入你的邮箱地址，我来帮你发送登录验证码。
@@ -162,9 +149,7 @@ curl -s -X POST "https://www.forma123.com/api/bff/auth/code/init" \
 ```
 从响应中提取 `flow_id`，保存备用。
 
----
-
-### Step 2 — 登录：验证验证码
+#### Step 2 — 登录：验证验证码
 
 主动询问：
 > 验证码已发送，请输入你收到的验证码。
@@ -176,18 +161,16 @@ curl -s -X POST "https://www.forma123.com/api/bff/auth/code/verify" \
   -d '{"flow_id": "上一步的flow_id", "code": "用户输入的验证码"}' \
   -c /tmp/forma_cookies.txt -b /tmp/forma_cookies.txt
 ```
-登录成功后 session cookie 自动保存，后续请求加 `-b /tmp/forma_cookies.txt`。
+登录成功后 session cookie 自动保存到 `/tmp/forma_cookies.txt`，后续所有请求加 `-b /tmp/forma_cookies.txt`。
 
----
+#### Step 3 — 创建项目
 
-### Step 3 — 创建项目
-
-根据第一个文档文件名自动推断项目名称（如 `丙午年趋势分享.docx` → `丙午年趋势分享`），自动生成项目 code。
+根据文档主题自动推断项目名称（如对话涉及"Python数据处理工具" → 项目名 `Python数据处理工具`），自动生成项目 code（如将名称转为拼音首字母或时间戳，例如 `python-data-tool-20260418`）。
 
 主动询问：
-> 项目名称将使用「{名称}」，项目访问码默认为 `{code}`，你可以直接回车确认，或输入自定义 code（只允许字母、数字、短横线）。
+> 项目名称将使用「{名称}」，项目访问码（code）默认为 `{code}`，你可以直接回车确认，或输入自定义 code（只允许字母、数字、短横线）。
 
-用户确认后，执行：
+用户确认或输入 code 后，执行：
 ```bash
 curl -s -X POST "https://www.forma123.com/api/bff/projects" \
   -H "Content-Type: application/json" \
@@ -196,75 +179,67 @@ curl -s -X POST "https://www.forma123.com/api/bff/projects" \
 ```
 从响应中提取 `project_id` 和 `code`，保存备用。
 
----
+#### Step 4 — 上传文档
 
-### Step 4 — 收集所有文档
+将Phase 1生成的文档保存为临时文件，然后立即上传：
 
-上传第一个文档后，询问用户是否还有其他文档：
-
-> 文档「xxx.docx」已上传。请问还有其他文档需要上传吗？如果有，请提供下一个文档的路径或链接；如果没有，请回复「没有了」。
-
-每收到一个文档就立即上传：
 ```bash
-# 本地路径
-curl -s -X POST "https://www.forma123.com/api/bff/projects/{project_id}/documents" \
-  -b /tmp/forma_cookies.txt \
-  -F "file=@/本地路径/文档文件名"
+# 保存生成的文档内容为临时文件
+cat > /tmp/manual.md << 'EOF'
+生成的文档内容
+EOF
 
-# URL：先下载再上传
-curl -L "文档URL" -o "/tmp/文档文件名"
+# 上传文档
 curl -s -X POST "https://www.forma123.com/api/bff/projects/{project_id}/documents" \
   -b /tmp/forma_cookies.txt \
-  -F "file=@/tmp/文档文件名"
+  -F "file=@/tmp/manual.md"
 ```
 
-每次上传后保存 `document_id`，直到用户回复「没有了」。
+保存返回的 `document_id`。
 
----
+> 注意：不需要询问用户是否有其他文档，直接进行下一步。
 
-### Step 5 — 触发一键生成，轮询子页面并发布
+#### Step 5 — 触发一键生成并轮询发布
 
 **5.1 触发一键生成**
 
-用全部 `document_ids` 创建一键生成模块：
+用 `document_id` 创建一键生成模块（该模块是触发器，生成后会被软删除，不需要跟踪它的状态）：
 ```bash
 curl -s -X POST "https://www.forma123.com/api/bff/projects/{project_id}/modules/generate" \
   -H "Content-Type: application/json" \
   -b /tmp/forma_cookies.txt \
   -d '{
     "template_code": "one_click",
-    "document_ids": ["doc_id_1", "doc_id_2", "..."],
+    "document_ids": ["document_id"],
     "params": {},
     "config_snapshot": {}
   }'
 ```
 
-**5.2 轮询项目模块列表，等待子页面出现**
+**5.2 轮询检查并发布页面**
 
-一键生成触发后，约需1分钟出现第一个子页面；之后每隔约10秒生成一个。
+一键生成触发后，约需 1 分钟才会出现第一个子页面；第一个页面出现后，后续每隔约 10 秒生成一个，共 5~15 个。
 
-轮询方式：**不使用长时间 sleep 阻塞**，每隔60秒执行一次：
+轮询方式：**不使用长时间 sleep 阻塞**，每隔 60 秒执行一次：
 
-1. 请求模块列表：
 ```bash
+# 获取模块列表
 curl -s "https://www.forma123.com/api/bff/projects/{project_id}/modules?include_hidden=true" \
   -b /tmp/forma_cookies.txt
 ```
 
-2. 对所有已知子页面，检查各自状态
+检查逻辑：
+1. 解析响应，获取所有模块（子页面）列表
+2. 对每个模块检查：`data.runtime.artifacts.final` 是否为非空数组
+3. 统计：总页面数、已发布数、待发布数（有final但未发布）、生成中数
 
-3. 向用户输出当前状态摘要：
+向用户输出当前状态摘要：
 ```
 [轮询 #3] 已发现 5 个页面 | 已发布 2 | 生成中 3 | 无新页面 8s
 ```
 
-**终止条件**：连续180秒没有新模块出现，且所有页面均已发布或失败。
-
-**5.3 有 final artifact 即发布**
-
-每轮检查所有子页面，判断依据：`data.runtime.artifacts.final` 是否为非空数组。
-
-- `final` 非空 → 立即发布（无论 `ui_status` 状态）
+**发布条件**：
+- `final` 非空 → 立即发布（无论 `ui_status` 是 `completed` 还是 `waiting_input`）
 - `ui_status == "failed"` 且 `final` 为空 → 记录失败，跳过
 - 其他 → 继续等待
 
@@ -281,91 +256,37 @@ curl -s -X PUT "https://www.forma123.com/api/bff/projects/{project_id}/modules/{
 ✓ 已发布：「页面名称」
 ```
 
----
+**5.3 完成确认**
 
-### Step 6 — 返回访问链接
+继续轮询，直到满足**终止条件**：
+- 连续 180 秒没有新模块出现，且所有已知页面均已发布或失败
 
-所有页面均已发布后，输出：
+如果发现有遗漏页面（有final但未发布），继续执行发布操作，直到所有页面都发布完成。
+
+#### Step 6 — 最终检查并返回访问链接
+
+**最终检查步骤**：
+
+在返回访问链接之前，必须执行一次最终检查：
+
+```bash
+# 最终检查：获取完整的模块列表
+curl -s "https://www.forma123.com/api/bff/projects/{project_id}/modules?include_hidden=true" \
+  -b /tmp/forma_cookies.txt
+```
+
+检查清单：
+- [ ] 所有模块都已出现在列表中
+- [ ] 所有有final的模块 `is_published` 都为 `true`
+- [ ] 没有处于生成中状态的模块
+
+如果检查通过，输出：
 
 > 页面已全部生成并发布！你的手册访问地址是：
 >
 > **https://www.forma123.com/@{project_code}**
 
-## 综合工作流：对话 → 文档 → 手册
-
-当用户希望从对话内容直接生成在线手册时，执行以下流程：
-
-### Phase 1: 内容提取
-1. 分析对话历史，提取关键信息
-2. 生成结构化的文档内容
-3. 将内容保存为临时文档文件
-
-### Phase 2: Forma发布
-1. 引导用户登录Forma（Step 1-2）
-2. 创建项目（Step 3）
-3. 上传生成的文档（Step 4）
-4. 触发一键生成并轮询发布（Step 5）
-5. 返回访问链接（Step 6）
-
-## 文档内容质量标准
-
-### 准确性检查
-- [ ] 所有技术细节与对话记录一致
-- [ ] 文件路径、URL、命令准确无误
-- [ ] 示例代码经过验证（语法正确）
-- [ ] 步骤完整，没有遗漏
-
-### 完整性检查
-- [ ] 背景清晰，读者能理解来龙去脉
-- [ ] 功能全覆盖，所有已实现功能都有描述
-- [ ] 边界情况、异常处理有说明
-- [ ] 所有前置条件都已列出
-
-### 可读性检查
-- [ ] 结构清晰，标题层级合理
-- [ ] 语言简洁，直击要点
-- [ ] 术语一致，格式规范
-
-### 实用性检查
-- [ ] 新用户能在5分钟内开始使用
-- [ ] 常见问题能快速定位
-- [ ] 独立完整，无需额外解释
-
-## 写作风格指南
-
-**使用主动语态**
-- ❌ "文件可以被保存"
-- ✅ "保存文件"
-
-**使用第二人称**
-- ❌ "用户需要配置..."
-- ✅ "你需要配置..."
-
-**具体而非抽象**
-- ❌ "运行命令"
-- ✅ "运行 `npm start`"
-
-**代码块规范**
-- 始终标注语言类型
-- 关键行添加注释
-- 复杂示例添加说明
-
-## 受众适配
-
-**技术用户**
-- 提供详细的API说明
-- 包含架构和实现细节
-- 给出性能考量
-
-**业务用户**
-- 强调价值和收益
-- 使用业务术语
-- 提供ROI相关信息
-
-**终端用户**
-- 使用通俗语言
-- 提供视觉指引
-- 聚焦操作步骤
+如果检查不通过，继续轮询等待，直到所有条件满足。
 
 ## Cookie 管理
 
@@ -373,119 +294,148 @@ curl -s -X PUT "https://www.forma123.com/api/bff/projects/{project_id}/modules/{
 - 登录后 cookie 自动持久化，无需用户手动处理
 - 如果中途出现 401，重新执行 Step 1-2 重新登录
 
-## 特殊场景处理
-
-### 场景 1：对话信息不完整
-**策略**：
-1. 标记缺失信息：`[待确认：具体版本号]`
-2. 基于常见实践提供建议值
-3. 提醒用户验证和补充
-
-### 场景 2：需求发生变化
-**策略**：
-1. 记录变化轨迹
-2. 说明最终采用的需求
-3. 简要提及被放弃的方案及原因
-
-### 场景 3：技术债务/已知问题
-**策略**：
-1. 在独立章节中透明说明
-2. 分类：关键限制 vs 轻微瑕疵
-3. 提供规避方案或替代方法
-
-### 场景 4：已有文档 + 补充内容
-用户已有文档，但希望结合对话内容补充说明。
-
-**策略**：
-1. 先上传已有文档到Forma
-2. 从对话提取补充内容生成新文档
-3. 一并上传，让Forma整合处理
-
-## 输出交付流程
-
-### 纯文档模式（不上传Forma）
-```
-"我将基于对话生成帮助文档。首先请确认：
-1. 目标读者是谁？
-2. 需要什么类型的文档？
-3. 是否有必须包含的特定内容？"
-```
-
-### 完整手册模式（提取+发布）
-```
-"我将帮你：
-1. 分析对话提取关键内容
-2. 整理成结构化文档
-3. 上传到Forma生成在线手册
-
-请确认目标受众，以及你希望手册的主要用途是什么？"
-```
-
-### 已有文档模式（直接发布）
-```
-"我将帮你将现有文档发布为在线手册。
-
-请提供：
-1. 文档路径或链接（支持 .doc .docx .pdf .ppt .pptx .html 等格式）
-2. 期望的项目名称（可选，默认使用文件名）"
-```
-
 ## 示例场景
 
-### 示例 1：Python工具 + 在线手册
+### 示例：Python工具 + 在线手册
+
 **场景**：用户与Agent协作开发了一个数据处理脚本，希望生成文档并发布
 
 **执行**：
-1. 分析对话，提取功能说明、使用方法、技术栈
+1. 分析对话，提取功能说明、使用方法、技术栈（严格依据对话内容）
 2. 生成完整的README风格文档
 3. 保存为临时文件
 4. 引导用户登录Forma
 5. 创建项目，上传文档
-6. 一键生成手册，返回访问链接
-
-### 示例 2：已有Word文档转手册
-**场景**：用户有一份产品说明书.docx，希望转成在线帮助中心
-
-**执行**：
-1. 确认文档路径
-2. 引导用户登录Forma
-3. 创建项目（使用文档名作为项目名）
-4. 上传文档
-5. 一键生成手册
-6. 轮询并发布所有页面
-7. 返回访问链接
-
-### 示例 3：多文档整合手册
-**场景**：用户有多个相关文档（产品介绍、使用指南、FAQ），希望整合成统一手册
-
-**执行**：
-1. 依次收集所有文档路径
-2. 引导用户登录Forma
-3. 创建项目
-4. 批量上传所有文档
-5. 一键生成（Forma会自动整合）
-6. 轮询发布，返回访问链接
+6. 一键生成手册
+7. 轮询所有页面并逐一发布
+8. 最终检查确认所有页面已发布
+9. 返回访问链接
 
 ## 附录：Forma API 参考
 
 ### 基础信息
 - **Base URL**: `https://www.forma123.com`
 - **BFF路径**: `/api/bff/...`
+- **BFF流式路径**: `/api/bff-stream/...`（SSE接口）
 - **鉴权**: Cookie（登录后自动携带）
+
+### 响应结构约定
+
+后端标准响应格式：
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { ... }
+}
+```
+
+列表接口：
+```json
+{
+  "data": { "list": [...], "total": 0 }
+}
+```
 
 ### 核心接口
 
 | 功能 | 方法 | 路径 |
 |------|------|------|
+| **认证** |
 | 发送验证码 | POST | `/api/bff/auth/code/init` |
 | 验证登录 | POST | `/api/bff/auth/code/verify` |
+| 获取会话 | GET | `/api/bff/auth/session` |
+| 登出 | POST | `/api/bff/auth/logout` |
+| **项目管理** |
+| 获取项目列表 | GET | `/api/bff/projects` |
+| 获取项目详情 | GET | `/api/bff/projects/detail?project_id=xxx` 或 `?code=xxx` |
 | 创建项目 | POST | `/api/bff/projects` |
-| 上传文档 | POST | `/api/bff/projects/{id}/documents` |
-| 一键生成 | POST | `/api/bff/projects/{id}/modules/generate` |
-| 获取模块列表 | GET | `/api/bff/projects/{id}/modules` |
-| 发布模块 | PUT | `/api/bff/projects/{id}/modules/{mid}` |
+| 更新项目 | PUT | `/api/bff/projects/{project_id}` |
+| 删除项目 | DELETE | `/api/bff/projects/{project_id}` |
+| **模块管理** |
+| 获取模块列表 | GET | `/api/bff/projects/{project_id}/modules?include_hidden=true` |
+| 获取模块详情 | GET | `/api/bff/projects/{project_id}/modules/{module_id}` |
+| 创建模块（触发生成） | POST | `/api/bff/projects/{project_id}/modules/generate` |
+| 更新模块 | PUT | `/api/bff/projects/{project_id}/modules/{module_id}` |
+| 删除模块 | DELETE | `/api/bff/projects/{project_id}/modules/{module_id}` |
+| 模块SSE流 | GET | `/api/bff-stream/projects/{project_id}/modules/{module_id}/stream` |
+| **Artifact** |
+| 获取Artifact列表 | GET | `/api/bff/projects/{project_id}/modules/{module_id}/artifacts` |
+| 获取单个Artifact | GET | `/api/bff/projects/{project_id}/artifacts/{artifact_id}` |
+| 更新Artifact | PUT | `/api/bff/projects/{project_id}/artifacts/{artifact_id}` |
+| 确认Artifact | POST | `/api/bff/projects/{project_id}/artifacts/{artifact_id}/confirm` |
+| **素材（文档）** |
+| 获取文档列表 | GET | `/api/bff/projects/{project_id}/documents` |
+| 上传文档 | POST | `/api/bff/projects/{project_id}/documents` |
+| 获取文档详情 | GET | `/api/bff/documents/{document_id}` |
+| 更新文档可见性 | PUT | `/api/bff/documents/{document_id}` |
+| 删除文档 | DELETE | `/api/bff/documents/{document_id}` |
+| 下载文档 | GET | `/api/bff/documents/{document_id}/download?inline=true/false` |
+| **Human Input** |
+| 获取当前输入请求 | GET | `/api/bff/projects/{project_id}/human-inputs/current?module_id=xxx` |
+| 提交输入 | POST | `/api/bff/projects/{project_id}/human-inputs/{request_id}/submit` |
+| **流水线运行** |
+| 获取Run详情 | GET | `/api/bff/projects/{project_id}/runs/{run_id}` |
+| 停止Run | POST | `/api/bff/projects/{project_id}/runs/{run_id}/stop` |
+| **知识库** |
+| 知识检索 | POST | `/api/bff/knowledge/search` |
+| 刷新知识库状态 | POST | `/api/bff/projects/{project_id}/knowledge/refresh-status` |
+| **Copilot** |
+| 获取Copilot配置 | GET | `/api/bff/projects/{project_id}/copilot` |
+| 更新Copilot配置 | PUT | `/api/bff/projects/{project_id}/copilot` |
+| 获取会话列表 | GET | `/api/bff/projects/{project_id}/copilot/sessions` |
+| 创建会话 | POST | `/api/bff/projects/{project_id}/copilot/sessions` |
+| 获取消息列表 | GET | `/api/bff/projects/{project_id}/copilot/sessions/{session_id}/messages` |
+| 流式发送消息 | POST | `/api/bff-stream/projects/{project_id}/copilot/sessions/{session_id}/messages/stream` |
+| 归档会话 | DELETE | `/api/bff/projects/{project_id}/copilot/sessions/{session_id}` |
+| **Share页（公开访问）** |
+| 获取Share项目数据 | GET | `/api/bff/share/projects/{project_code}` |
+| 创建公开Copilot会话 | POST | `/api/bff/share/projects/{project_code}/copilot/sessions` |
+| 获取公开会话消息 | GET | `/api/bff/share/projects/{project_code}/copilot/sessions/{session_id}/messages` |
+| 公开Copilot流式消息 | POST | `/api/bff-stream/share/projects/{project_code}/copilot/sessions/{session_id}/messages/stream` |
+| 下载公开文档 | GET | `/api/bff/share/projects/{project_code}/documents/{document_id}/download` |
+| **模块模板** |
+| 获取模板定义列表 | GET | `/api/bff/module-template-definitions?is_enabled=true` |
+| **Agent定义** |
+| 获取Agent定义列表 | GET | `/api/bff/project-agent-definitions` |
+
+### 模块状态说明
+
+| 状态 | 说明 | 处理策略 |
+|------|------|----------|
+| `pending` | 等待执行 | 继续等待 |
+| `running` | 执行中 | 继续等待 |
+| `waiting_input` | 等待人工输入 | 如果有final则发布，否则需提交Human Input |
+| `completed` | 已完成 | 可以发布 |
+| `failed` | 失败 | 跳过 |
+
+### Human Input 处理
+
+当模块状态为 `waiting_input` 且 `final` 为空时：
+
+1. 获取当前输入请求：
+```bash
+curl -s "https://www.forma123.com/api/bff/projects/{project_id}/human-inputs/current?module_id={module_id}" \
+  -b /tmp/forma_cookies.txt
+```
+
+2. 提交用户输入：
+```bash
+curl -s -X POST "https://www.forma123.com/api/bff/projects/{project_id}/human-inputs/{request_id}/submit" \
+  -H "Content-Type: application/json" \
+  -b /tmp/forma_cookies.txt \
+  -d '{
+    "module_id": "module_id",
+    "payload": {
+      "inputs": { "query": "用户输入内容" },
+      "action": "continue"
+    },
+    "submitted_by": "forma-live-user"
+  }'
+```
+
+> **注意**：`current` 接口 **必须传 `module_id`**，否则同项目多个 `waiting_input` 模块并发时会拿错请求。
 
 ---
 
-*整合技能版本：v1.0*
-*整合了 auto-docs-generator + Forma Web BFF API Skill*
+*版本：v2.1 - 补充完整API文档和状态处理*
